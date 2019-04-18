@@ -5,15 +5,23 @@
       </slot>
     </div>
     <div class="dots">
+      <span class="dot" v-for="(item, index) in dots" :key="item" :class="{active:
+        currentPageIndex === index}"></span>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-// import BScroll from 'better-scroll'
+import BScroll from 'better-scroll'
 import {addClass} from 'common/js/dom'
 
 export default {
+  data() {
+    return {
+      dots: [],
+      currentPageIndex: 0
+    }
+  },
   props: {
     loop: {
       type: Boolean,
@@ -31,12 +39,14 @@ export default {
   mounted() {
     setTimeout(() => {
       this._setSliderWidth()
+      this._initDots()
       this._initSlider()
     }, 20)
   },
   methods: {
     _setSliderWidth() {
       this.children = this.$refs.sliderGroup.children
+      console.log(this.children.length)
 
       let width = 0
       let sliderWidth = this.$refs.slider.clientWidth
@@ -52,17 +62,25 @@ export default {
       }
       this.$refs.sliderGroup.style.width = width + 'px'
     },
+    // dots 设置为数组
+    _initDots() {
+      this.dots = new Array(this.children.length)
+    },
     _initSlider() {
-    //   this.slider = new BScroll(this.$refs.slider, {
-    //     scrollX: true,
-    //     scrollY: false,
-    //     momentum: false,
-    //     snap: true,
-    //     snaploop: this.loop,
-    //     snapthreshold: 0.3,
-    //     snapSpeed: 400,
-    //     click: true
-    //   })
+      this.slider = new BScroll(this.$refs.slider, {
+        scrollX: true,
+        scrollY: false,
+        momentum: false,
+        snap: true,
+        snaploop: this.loop,
+        snapthreshold: 0.3,
+        snapSpeed: 400,
+        click: true
+      })
+      this.slider.on('scrollEnd', () => {
+        let pageIndex = this.slider.getCurrentPage().pageX // pageX表示第几个子元素
+        this.currentPageIndex = pageIndex
+      })
     }
   }
 }
@@ -72,6 +90,7 @@ export default {
   @import "~common/stylus/variable"
 
   .slider
+    position: relative
     min-height: 1px
     .slider-group
       position: relative
